@@ -1,0 +1,32 @@
+<!-- Add this to a new/existing HTML file -->
+<div class="container mt-5">
+  <h2>AI Pet Breed Identifier</h2>
+  <input type="file" id="pet-upload" accept="image/*" class="form-control">
+  <button onclick="identifyBreed()" class="btn btn-primary mt-3">Identify Breed</button>
+  <div id="result" class="mt-4"></div>
+</div>
+
+<!-- Load TensorFlow.js and MobileNet -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+
+<script>
+  async function identifyBreed() {
+    const model = await mobilenet.load();
+    const image = document.getElementById('pet-upload').files[0];
+    const imgElement = document.createElement('img');
+    imgElement.src = URL.createObjectURL(image);
+    
+    imgElement.onload = async () => {
+      const predictions = await model.classify(imgElement);
+      const topPrediction = predictions[0];
+      document.getElementById('result').innerHTML = `
+        <div class="alert alert-success">
+          <strong>Prediction:</strong> ${topPrediction.className.replace(/_/g, ' ')} 
+          (${Math.round(topPrediction.probability * 100)}% confidence)
+        </div>
+        <img src="${imgElement.src}" width="300" class="img-thumbnail mt-3">
+      `;
+    };
+  }
+</script>
